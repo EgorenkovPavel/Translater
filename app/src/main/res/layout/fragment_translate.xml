@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    tools:context="com.epipasha.translater.fragments.FavoritesFragment">
+    android:padding="16dp">
 
     <EditText
         android:id="@+id/textIn"
@@ -16,8 +15,7 @@
         android:layout_alignParentStart="true"
         android:ems="10"
         android:hint="Type here..."
-        android:inputType="textMultiLine"
-        android:layout_below="@+id/textView" />
+        android:inputType="textMultiLine" />
 
     <Spinner
         android:id="@+id/spLang"
@@ -26,29 +24,38 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/textIn"
-        android:layout_toStartOf="@+id/imageButton2"
-        android:layout_toLeftOf="@+id/imageButton2"
-        android:layout_alignBottom="@+id/imageButton2" />
+        android:layout_toStartOf="@+id/btnGo"
+        android:layout_toLeftOf="@+id/btnGo"
+        android:layout_alignBottom="@+id/btnGo" />
 
     <TextView
         android:id="@+id/textOut"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/spLang" />
+        android:layout_below="@+id/spLang"
+        android:layout_above="@+id/textView" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
+        android:text="Переведено сервисом «Яндекс.Переводчик»"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:text="Переведено сервисом «Яндекс.Переводчик»" />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:id="@+id/btnGo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textIn"
+        android:text="Go" />
 
 </RelativeLayout>
 

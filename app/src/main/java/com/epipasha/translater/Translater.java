@@ -20,6 +20,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,45 +31,6 @@ import java.util.Set;
 public class Translater {
 
     private static final String API_KEY = "trnsl.1.1.20170316T165017Z.6542920cb7c835ce.bd48c1d999a2f34330ff01fe6b07792cdc8da13d";
-
-    static final String TAG = "Translater";
-
-    private static Map<String, String> gerSuppotedLangs(String baseLang){
-
-        Map<String, String> result = new HashMap<>();
-
-        try{
-            String url = Uri.parse("https://translate.yandex.net/api/v1.5/tr.json/getLangs")
-                    .buildUpon()
-                    .appendQueryParameter("key", API_KEY)
-                    .appendQueryParameter("ui", baseLang)
-                    .build().toString();
-            String jsonString = getUrlString(url);
-            Log.i(TAG, "Reseived JSON " + jsonString);
-
-            JSONObject jsonBody = new JSONObject(jsonString);
-
-            JSONArray dirs = jsonBody.getJSONArray("dirs");
-            JSONObject langs = jsonBody.getJSONObject("langs");
-
-            for (int i=0; i < dirs.length(); i++){
-                String item = dirs.getString(i);
-
-                if(item.startsWith(baseLang)){
-                    int ind = item.indexOf("-");
-                    String l = item.substring(ind+1, item.length());
-                    result.put(l, langs.getString(l));
-                }
-            }
-
-        } catch (IOException e) {
-            Log.i(TAG, "Failed to connect", e);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return result;
-    }
 
     private static byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
@@ -97,6 +59,75 @@ public class Translater {
         return new String(getUrlBytes(urlSpec));
     }
 
+
+    private static Map<String, String> gerSuppotedLangs(String baseLang){
+
+        Map<String, String> result = new HashMap<>();
+
+        try{
+            String url = Uri.parse("https://translate.yandex.net/api/v1.5/tr.json/getLangs")
+                    .buildUpon()
+                    .appendQueryParameter("key", API_KEY)
+                    .appendQueryParameter("ui", baseLang)
+                    .build().toString();
+            String jsonString = getUrlString(url);
+
+            JSONObject jsonBody = new JSONObject(jsonString);
+
+            JSONArray dirs = jsonBody.getJSONArray("dirs");
+            JSONObject langs = jsonBody.getJSONObject("langs");
+
+            for (int i=0; i < dirs.length(); i++){
+                String item = dirs.getString(i);
+
+                if(item.startsWith(baseLang)){
+                    int ind = item.indexOf("-");
+                    String l = item.substring(ind+1, item.length());
+                    result.put(l, langs.getString(l));
+                }
+            }
+
+        } catch (IOException e) {
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    private static String translate(String inputString, String lang){
+        String result = "";
+
+        try{
+            String url = Uri.parse("https://translate.yandex.net/api/v1.5/tr.json/translate")
+                    .buildUpon()
+                    .appendQueryParameter("key", API_KEY)
+                    .appendQueryParameter("text", inputString)
+                    .appendQueryParameter("lang", lang)
+                    .appendQueryParameter("format", "html")
+                    .build().toString();
+            String jsonString = getUrlString(url);
+
+            JSONObject jsonBody = new JSONObject(jsonString);
+
+
+            JSONArray text = jsonBody.getJSONArray("text");
+            StringBuilder b = new StringBuilder();
+            for (int i=0; i < text.length(); i++) {
+                result = result + text.get(i) + "\n";
+            }
+
+        } catch (IOException e) {
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+
     public static class SuppotedLangs extends AsyncTask<Context,Void,Map<String, String>> {
 
         private OnCompletedListener listener;
@@ -112,7 +143,7 @@ public class Translater {
         @Override
         protected Map<String, String> doInBackground(Context... con) {
 
-            Map<String, String> result = gerSuppotedLangs("ru");
+            Map<String, String> result = gerSuppotedLangs(Locale.getDefault().getLanguage());
 
             return result;
         }
@@ -161,45 +192,6 @@ public class Translater {
             if (listener != null)
                 listener.onTaskCompleted(result);
         }
-    }
-
-    private static String translate(String inputString, String lang){
-        String result = "";
-
-        try{
-            String url = Uri.parse("https://translate.yandex.net/api/v1.5/tr.json/translate")
-                    .buildUpon()
-                    .appendQueryParameter("key", API_KEY)
-                    .appendQueryParameter("text", inputString)
-                    .appendQueryParameter("lang", lang)
-                    .appendQueryParameter("format", "html")
-                    .build().toString();
-            String jsonString = getUrlString(url);
-            Log.i(TAG, "Reseived JSON " + jsonString);
-
-            JSONObject jsonBody = new JSONObject(jsonString);
-
-            /*
-            JSONArray dirs = jsonBody.getJSONArray("dirs");
-            JSONObject langs = jsonBody.getJSONObject("langs");
-
-            for (int i=0; i < dirs.length(); i++){
-                String item = dirs.getString(i);
-
-                if(item.startsWith(baseLang)){
-                    int ind = item.indexOf("-");
-                    String l = item.substring(ind+1, item.length());
-                    result.put(l, langs.getString(l));
-                }
-            }
-*/
-        } catch (IOException e) {
-            Log.i(TAG, "Failed to connect", e);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return result;
     }
 
 }
