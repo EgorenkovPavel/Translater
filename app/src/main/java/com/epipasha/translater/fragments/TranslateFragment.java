@@ -17,11 +17,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.epipasha.translater.R;
 import com.epipasha.translater.Translater;
+import com.epipasha.translater.db.DbManager;
 import com.epipasha.translater.objects.Language;
 
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ public class TranslateFragment extends Fragment
     TextView textOut;
     Spinner spLang;
     Button btnGo;
+    ImageButton btnStar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -48,23 +51,29 @@ public class TranslateFragment extends Fragment
         textIn = (EditText) v.findViewById(R.id.textIn);
         textOut = (TextView) v.findViewById(R.id.textOut);
         spLang = (Spinner) v.findViewById(R.id.spLang);
-        btnGo = (Button)v.findViewById(R.id.btnGo);
+        btnStar = (ImageButton)v.findViewById(R.id.btnStar);
 
-        spLang.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        textIn.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                translate();
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
 
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                translate();
             }
         });
-        btnGo.setOnClickListener(new View.OnClickListener() {
+
+         btnStar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                translate();
+                DbManager.getInstance(getActivity()).addFavorites(textIn.getText().toString(), "", textOut.getText().toString(), (String) ((Language)spLang.getSelectedItem()).getCode());
             }
         });
 

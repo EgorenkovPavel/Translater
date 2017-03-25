@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.Fragment;
@@ -32,12 +33,16 @@ public class HistoryFragment extends Fragment implements LoaderManager.LoaderCal
     SimpleCursorAdapter mAdapter;
     String mCurFilter;
 
+    SQLiteDatabase db;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_history, container, false);
         list = (ListView)v.findViewById(R.id.list);
 
         setHasOptionsMenu(true);
+
+        db = new DbHelper(getActivity()).getReadableDatabase();
 
         // Create an empty adapter we will use to display the loaded data.
         mAdapter = new SimpleCursorAdapter(getActivity(),
@@ -81,7 +86,7 @@ public class HistoryFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new MyCursorLoader(getActivity());
+        return new MyCursorLoader(getActivity(), db);
     }
 
     @Override
@@ -100,13 +105,16 @@ public class HistoryFragment extends Fragment implements LoaderManager.LoaderCal
 
     static class MyCursorLoader extends CursorLoader {
 
-        public MyCursorLoader(Context context) {
+        SQLiteDatabase db;
+
+        public MyCursorLoader(Context context, SQLiteDatabase db) {
             super(context);
+            this.db = db;
         }
 
         @Override
         public Cursor loadInBackground() {
-            Cursor cursor = DbManager.getInstance(getContext()).getHistory();
+            Cursor cursor = db.query(DbHelper.TABLE_HISTORY, null, null, null, null, null, DbHelper._ID + " DESC");
             return cursor;
         }
     }
@@ -114,6 +122,6 @@ public class HistoryFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onDetach() {
         super.onDetach();
-
+        db.close();
     }
 }

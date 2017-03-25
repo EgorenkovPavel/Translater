@@ -37,12 +37,6 @@ public class DbManager {
         db.close();
     }
 
-    public Cursor getHistory(){
-        db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.query(DbHelper.TABLE_HISTORY, null, null, null, null, null, DbHelper._ID + " DESC");
-        //close();
-        return cursor;
-    }
 
     public int addHistory(String inputText, String inputCode, String outputText, String outputCode){
         open();
@@ -54,6 +48,20 @@ public class DbManager {
         values.put(DbHelper.OUTPUT_CODE, outputCode);
 
         int res = (int)db.insertOrThrow(DbHelper.TABLE_HISTORY, null, values);
+        close();
+        return res;
+    }
+
+    public int addFavorites(String inputText, String inputCode, String outputText, String outputCode){
+        open();
+        ContentValues values = new ContentValues(4);
+
+        values.put(DbHelper.INPUT_TEXT, inputText);
+        values.put(DbHelper.INPUT_CODE, inputCode);
+        values.put(DbHelper.OUTPUT_TEXT, outputText);
+        values.put(DbHelper.OUTPUT_CODE, outputCode);
+
+        int res = (int)db.insertOrThrow(DbHelper.TABLE_FAVORITES, null, values);
         close();
         return res;
     }

@@ -48,14 +48,14 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
-    <Button
-        android:id="@+id/btnGo"
+    <ImageButton
+        android:id="@+id/btnStar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/textIn"
-        android:text="Go" />
+        android:layout_alignParentTop="true"
+        app:srcCompat="@android:drawable/btn_star_big_on" />
 
 </RelativeLayout>
 
