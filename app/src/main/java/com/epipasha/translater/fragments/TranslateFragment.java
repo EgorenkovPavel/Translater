@@ -22,7 +22,9 @@ import android.widget.TextView;
 
 import com.epipasha.translater.R;
 import com.epipasha.translater.Translater;
+import com.epipasha.translater.objects.Language;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,15 +77,15 @@ public class TranslateFragment extends Fragment
 
     private void translate() {
         Translater.Trans task = new Translater.Trans();
-        task.setLang((String) ((Map.Entry)spLang.getSelectedItem()).getKey());
+        task.setLang((String) ((Language)spLang.getSelectedItem()).getCode());
         task.setInputString(textIn.getText().toString());
         task.setCompleteListener(this);
         task.execute(getActivity());
     }
 
     @Override
-    public void onTaskCompleted(Map<String, String> result) {
-        ArrayAdapter<String> adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_spinner_item, result.entrySet().toArray());
+    public void onTaskCompleted(ArrayList<Language> result) {
+        ArrayAdapter<String> adapter = new ArrayAdapter(getActivity(), android.R.layout.simple_spinner_item, result.toArray());
         spLang.setAdapter(adapter);
     }
 
@@ -93,22 +95,4 @@ public class TranslateFragment extends Fragment
         textOut.setText(result);
     }
 
-    private class CustomAdaper extends ArrayAdapter<Map.Entry>{
-
-        private Map.Entry[] objects;
-
-        public CustomAdaper(@NonNull Context context, @LayoutRes int resource, @NonNull Map.Entry[] objects) {
-            super(context, resource, objects);
-            this.objects = objects;
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            TextView t = (TextView) convertView.findViewById(android.R.id.text1);
-            t.setText(objects[position].getValue().toString());
-            return convertView;
-            //return super.getView(position, convertView, parent);
-        }
-    }
 }

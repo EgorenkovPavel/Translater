@@ -8,6 +8,9 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.epipasha.translater.db.DbManager;
+import com.epipasha.translater.objects.Language;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -60,9 +64,9 @@ public class Translater {
     }
 
 
-    private static Map<String, String> gerSuppotedLangs(String baseLang){
+    private static ArrayList<Language> gerSuppotedLangs(String baseLang){
 
-        Map<String, String> result = new HashMap<>();
+        ArrayList<Language> result = new ArrayList<Language>();
 
         try{
             String url = Uri.parse("https://translate.yandex.net/api/v1.5/tr.json/getLangs")
@@ -82,8 +86,10 @@ public class Translater {
 
                 if(item.startsWith(baseLang)){
                     int ind = item.indexOf("-");
-                    String l = item.substring(ind+1, item.length());
-                    result.put(l, langs.getString(l));
+                    String code = item.substring(ind+1, item.length());
+                    String name = langs.getString(code);
+                    Language lang = new Language(code, name);
+                    result.add(lang);
                 }
             }
 
@@ -128,12 +134,12 @@ public class Translater {
     }
 
 
-    public static class SuppotedLangs extends AsyncTask<Context,Void,Map<String, String>> {
+    public static class SuppotedLangs extends AsyncTask<Context,Void,ArrayList<Language>> {
 
         private OnCompletedListener listener;
 
         public interface OnCompletedListener{
-            void onTaskCompleted(Map<String, String> result);
+            void onTaskCompleted(ArrayList<Language> result);
         }
 
         public void setCompleteListener(OnCompletedListener listener){
@@ -141,18 +147,18 @@ public class Translater {
         }
 
         @Override
-        protected Map<String, String> doInBackground(Context... con) {
+        protected ArrayList<Language> doInBackground(Context... con) {
 
-            Map<String, String> result = gerSuppotedLangs(Locale.getDefault().getLanguage());
+            ArrayList<Language> result = gerSuppotedLangs(Locale.getDefault().getLanguage());
 
             return result;
         }
 
         @Override
-        protected void onPostExecute(Map<String, String> stringStringMap) {
-            super.onPostExecute(stringStringMap);
+        protected void onPostExecute(ArrayList<Language> langs) {
+            super.onPostExecute(langs);
             if (listener != null)
-                listener.onTaskCompleted(stringStringMap);
+                listener.onTaskCompleted(langs);
         }
     }
 
@@ -182,6 +188,8 @@ public class Translater {
         protected String doInBackground(Context... con) {
 
             String result = translate(inputString, lang);
+
+            DbManager.getInstance(con[0]).addHistory(inputString, "", result, lang);
 
             return result;
         }
