@@ -1,12 +1,8 @@
 package com.epipasha.translater;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.epipasha.translater.db.DbManager;
 import com.epipasha.translater.objects.Language;
@@ -21,16 +17,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-/**
- * Created by Pavel on 16.03.2017.
- */
 
 public class Translater {
 
@@ -63,7 +51,6 @@ public class Translater {
         return new String(getUrlBytes(urlSpec));
     }
 
-
     private static ArrayList<Language> gerSuppotedLangs(String baseLang){
 
         ArrayList<Language> result = new ArrayList<Language>();
@@ -78,23 +65,17 @@ public class Translater {
 
             JSONObject jsonBody = new JSONObject(jsonString);
 
-            JSONArray dirs = jsonBody.getJSONArray("dirs");
             JSONObject langs = jsonBody.getJSONObject("langs");
 
-            for (int i=0; i < dirs.length(); i++){
-                String item = dirs.getString(i);
-
-                if(item.startsWith(baseLang)){
-                    int ind = item.indexOf("-");
-                    String code = item.substring(ind+1, item.length());
-                    String name = langs.getString(code);
-                    Language lang = new Language(code, name);
-                    result.add(lang);
-                }
-            }
+            Iterator<String> i = langs.keys();
+            while(i.hasNext()){
+                String key = i.next();
+                Language lang = new Language(key, langs.getString(key));
+                result.add(lang);
+            };
 
         } catch (IOException e) {
-
+            e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -102,8 +83,10 @@ public class Translater {
         return result;
     }
 
-    private static String translate(String inputString, String lang){
+    private static String translate(String inputString, Language langIn, Language langOut){
         String result = "";
+
+        String lang = (langIn.isAutoLang()) ? langOut.getCode() : langIn.getCode() + "-" + langOut.getCode();
 
         try{
             String url = Uri.parse("https://translate.yandex.net/api/v1.5/tr.json/translate")
@@ -166,14 +149,19 @@ public class Translater {
 
         private OnCompletedListener listener;
         private String inputString;
-        private String lang;
+        private Language langOut;
+        private Language langIn;
 
         public void setInputString(String inputString) {
             this.inputString = inputString;
         }
 
-        public void setLang(String lang) {
-            this.lang = lang;
+        public void setLangOut(Language langOut) {
+            this.langOut = langOut;
+        }
+
+        public void setLangIn(Language langIn) {
+            this.langIn = langIn;
         }
 
         public interface OnCompletedListener{
@@ -187,9 +175,9 @@ public class Translater {
         @Override
         protected String doInBackground(Context... con) {
 
-            String result = translate(inputString, lang);
+            String result = translate(inputString, langIn, langOut);
 
-            DbManager.getInstance(con[0]).addHistory(inputString, "", result, lang);
+            DbManager.getInstance(con[0]).addHistory(inputString, langIn, result, langOut);
 
             return result;
         }

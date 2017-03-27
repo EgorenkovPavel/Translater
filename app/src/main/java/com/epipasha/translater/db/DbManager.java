@@ -5,6 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.epipasha.translater.objects.Language;
+
 /**
  * Created by Pavel on 20.03.2017.
  */
@@ -38,14 +40,14 @@ public class DbManager {
     }
 
 
-    public int addHistory(String inputText, String inputCode, String outputText, String outputCode){
+    public int addHistory(String inputText, Language langIn, String outputText, Language langOut){
         open();
         ContentValues values = new ContentValues(4);
 
         values.put(DbHelper.INPUT_TEXT, inputText);
-        values.put(DbHelper.INPUT_CODE, inputCode);
+        values.put(DbHelper.INPUT_CODE, langIn.getCode());
         values.put(DbHelper.OUTPUT_TEXT, outputText);
-        values.put(DbHelper.OUTPUT_CODE, outputCode);
+        values.put(DbHelper.OUTPUT_CODE, langOut.getCode());
 
         int res = (int)db.insertOrThrow(DbHelper.TABLE_HISTORY, null, values);
         close();

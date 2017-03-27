@@ -9,32 +9,46 @@
         android:id="@+id/textIn"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
+        android:layout_below="@+id/linearLayout"
+        android:layout_weight="1"
+        android:background="@drawable/edit_text"
         android:ems="10"
         android:hint="Type here..."
         android:inputType="textMultiLine" />
 
-    <Spinner
-        android:id="@+id/spLang"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/textIn"
-        android:layout_toStartOf="@+id/btnGo"
-        android:layout_toLeftOf="@+id/btnGo"
-        android:layout_alignBottom="@+id/btnGo" />
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout">
+
+        <Spinner
+            android:id="@+id/spLangIn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:spinnerMode="dialog" />
+
+        <Spinner
+            android:id="@+id/spLangOut"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/textIn"
+            android:layout_weight="1"
+            android:spinnerMode="dialog" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/textOut"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/textIn"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/spLang"
         android:layout_above="@+id/textView" />
 
     <TextView
@@ -54,8 +68,19 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        app:srcCompat="@android:drawable/btn_star_big_on" />
+        android:layout_below="@+id/linearLayout"
+        android:background="@android:color/transparent"
+        app:srcCompat="@android:drawable/btn_star_big_off" />
+
+    <ImageButton
+        android:id="@+id/btnCross"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textOut"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/transparent"
+        app:srcCompat="@drawable/ic_cross" />
 
 </RelativeLayout>
 
