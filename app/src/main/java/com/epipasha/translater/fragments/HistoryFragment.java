@@ -1,9 +1,10 @@
 package com.epipasha.translater.fragments;
 
-
+import android.app.Dialog;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Loader;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -12,6 +13,7 @@ import android.os.Bundle;
 import android.app.Fragment;
 import android.provider.ContactsContract;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -27,7 +29,10 @@ import com.epipasha.translater.R;
 import com.epipasha.translater.db.DbHelper;
 import com.epipasha.translater.db.DbManager;
 
-public class HistoryFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>, SearchView.OnQueryTextListener {
+public class HistoryFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<Cursor>,
+        SearchView.OnQueryTextListener,
+        DialogInterface.OnClickListener{
 
     ListView list;
     SimpleCursorAdapter mAdapter;
@@ -61,12 +66,40 @@ public class HistoryFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Place an action bar item for searching.
-        MenuItem item = menu.add("Search");
-        item.setIcon(android.R.drawable.ic_menu_search);
-        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        inflater.inflate(R.menu.list_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+
         SearchView sv = new SearchView(getActivity());
         sv.setOnQueryTextListener(this);
-        item.setActionView(sv);
+        menu.findItem(R.id.menu_search).setActionView(sv);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()){
+            case R.id.menu_clear:{
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+                builder.setPositiveButton(R.string.ok, this);
+                builder.setNegativeButton(R.string.cancel, null);
+                builder.setMessage(R.string.dialog_clear_message)
+                        .setTitle(R.string.dialog_clear_title);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
+
+    @Override
+    public void onClick(DialogInterface dialog, int which) {
+        DbManager.getInstance(getActivity()).deleteHistory();
+        getLoaderManager().restartLoader(0, null, this);
     }
 
     public boolean onQueryTextChange(String newText) {

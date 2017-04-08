@@ -68,4 +68,17 @@ public class DbManager {
         return res;
     }
 
+    public int deleteHistory(){
+        open();
+        int res = (int)db.delete(DbHelper.TABLE_HISTORY, null, null);
+        close();
+        return res;
+    }
+
+    public int deleteFavorites(){
+        open();
+        int res = (int)db.delete(DbHelper.TABLE_FAVORITES, null, null);
+        close();
+        return res;
+    }
 }

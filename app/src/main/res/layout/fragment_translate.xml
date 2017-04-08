@@ -12,11 +12,16 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/linearLayout"
-        android:layout_weight="1"
+        android:layout_marginTop="10dp"
         android:background="@drawable/edit_text"
         android:ems="10"
-        android:hint="Type here..."
-        android:inputType="textMultiLine" />
+        android:gravity="top"
+        android:hint="@string/type_here"
+        android:inputType="textMultiLine"
+        android:paddingBottom="8dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="30dp"
+        android:paddingTop="8dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -35,9 +40,6 @@
             android:id="@+id/spLangOut"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/textIn"
             android:layout_weight="1"
             android:spinnerMode="dialog" />
     </LinearLayout>
@@ -46,16 +48,17 @@
         android:id="@+id/textOut"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/textIn"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_above="@+id/textView" />
+        android:layout_below="@+id/textIn"
+        android:paddingLeft="10dp"
+        android:paddingTop="8dp" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Переведено сервисом «Яндекс.Переводчик»"
+        android:text="@string/translated_by_yandex"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -66,14 +69,15 @@
         android:id="@+id/btnStar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_below="@+id/linearLayout"
         android:background="@android:color/transparent"
-        app:srcCompat="@android:drawable/btn_star_big_off" />
+        app:srcCompat="@android:drawable/btn_star_big_off"
+        android:layout_alignTop="@+id/textIn"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:contentDescription="" />
 
     <ImageButton
-        android:id="@+id/btnCross"
+        android:id="@+id/btnClear"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/textOut"

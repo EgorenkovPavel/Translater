@@ -1,13 +1,11 @@
 package com.epipasha.translater.objects;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+
 import com.epipasha.translater.R;
 
-/**
- * Created by Pavel on 20.03.2017.
- */
-
-public class Language {
+public class Language implements Comparable<Language>{
 
     private String code;
     private String name;
@@ -21,18 +19,6 @@ public class Language {
 
     public String getCode() {
         return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override
@@ -49,5 +35,10 @@ public class Language {
 
     public boolean isAutoLang(){
         return this.equals(autoLang);
+    }
+
+    @Override
+    public int compareTo(Language o) {
+        return this.name.compareTo(o.name);
     }
 }

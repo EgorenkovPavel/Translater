@@ -17,10 +17,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
-public class Translater {
+public class Translator {
 
     private static final String API_KEY = "trnsl.1.1.20170316T165017Z.6542920cb7c835ce.bd48c1d999a2f34330ff01fe6b07792cdc8da13d";
 
@@ -104,7 +107,7 @@ public class Translater {
             JSONArray text = jsonBody.getJSONArray("text");
             StringBuilder b = new StringBuilder();
             for (int i=0; i < text.length(); i++) {
-                result = result + text.get(i) + "\n";
+                result = result + (result.isEmpty() ? "":"\n") + text.get(i);
             }
 
         } catch (IOException e) {
@@ -133,6 +136,8 @@ public class Translater {
         protected ArrayList<Language> doInBackground(Context... con) {
 
             ArrayList<Language> result = gerSuppotedLangs(Locale.getDefault().getLanguage());
+
+            Collections.sort(result);
 
             return result;
         }

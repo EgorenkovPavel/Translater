@@ -2,6 +2,7 @@ package com.epipasha.translater.fragments;
 
 import android.os.Bundle;
 import android.app.Fragment;
+import android.support.annotation.Nullable;
 import android.support.v4.content.res.ResourcesCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,17 +16,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.epipasha.translater.R;
-import com.epipasha.translater.Translater;
+import com.epipasha.translater.Translator;
 import com.epipasha.translater.db.DbManager;
 import com.epipasha.translater.objects.Language;
 
 import java.util.ArrayList;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 public class TranslateFragment extends Fragment
-        implements Translater.SuppotedLangs.OnCompletedListener, Translater.Trans.OnCompletedListener{
+        implements Translator.SuppotedLangs.OnCompletedListener, Translator.Trans.OnCompletedListener{
+
+    private static final String KEY_OUTPUT_TEXT = "outputText";
 
     EditText textIn;
     TextView textOut;
@@ -33,6 +33,7 @@ public class TranslateFragment extends Fragment
     ImageButton btnStar, btnCross;
 
     private ArrayList<Language> supportedLangs;
+    private String outputText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -45,7 +46,11 @@ public class TranslateFragment extends Fragment
         spLangIn = (Spinner) v.findViewById(R.id.spLangIn);
         spLangOut = (Spinner) v.findViewById(R.id.spLangOut);
         btnStar = (ImageButton)v.findViewById(R.id.btnStar);
-        btnCross = (ImageButton)v.findViewById(R.id.btnCross);
+        btnCross = (ImageButton)v.findViewById(R.id.btnClear);
+
+        if (outputText!=null){
+            textOut.setText(outputText);
+        }
 
         textIn.addTextChangedListener(new TextWatcher() {
             @Override
@@ -84,7 +89,7 @@ public class TranslateFragment extends Fragment
         });
 
         if (supportedLangs == null){
-            Translater.SuppotedLangs task = new Translater.SuppotedLangs();
+            Translator.SuppotedLangs task = new Translator.SuppotedLangs();
             task.setCompleteListener(this);
             task.execute(getActivity());
         }else{
@@ -95,11 +100,15 @@ public class TranslateFragment extends Fragment
     }
 
     private void translate() {
+        if (!isResumed()){
+            return;
+        }
+
         String inputText = textIn.getText().toString();
         if (inputText.isEmpty()) {
             textOut.setText("");
         }else{
-            Translater.Trans task = new Translater.Trans();
+            Translator.Trans task = new Translator.Trans();
             task.setLangOut((Language) spLangOut.getSelectedItem());
             task.setLangIn((Language) spLangIn.getSelectedItem());
             task.setInputString(inputText);
@@ -129,6 +138,7 @@ public class TranslateFragment extends Fragment
 
     @Override
     public void onTaskCompleted(String result) {
+        outputText = result;
         textOut.setText(result);
     }
 
