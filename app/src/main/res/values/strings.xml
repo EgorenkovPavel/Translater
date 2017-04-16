@@ -13,4 +13,5 @@
     <string name="dialog_clear_title">Clear list</string>
     <string name="type_here">Type here...</string>
     <string name="translated_by_yandex">Переведено сервисом «Яндекс.Переводчик»</string>
+    <string name="a_href_http_www_google_com_google_a"><![CDATA[<a href=\'http://www.google.com\'> Google </a>]]></string>
 </resources>

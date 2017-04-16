@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.epipasha.translater.db.DbManager;
+import com.epipasha.translater.objects.Answer;
 import com.epipasha.translater.objects.Language;
 
 import org.json.JSONArray;
@@ -18,14 +19,13 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 
 public class Translator {
 
     private static final String API_KEY = "trnsl.1.1.20170316T165017Z.6542920cb7c835ce.bd48c1d999a2f34330ff01fe6b07792cdc8da13d";
+    private static final int TRANSLATE_DELAY = 500;
 
     private static byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
@@ -54,7 +54,9 @@ public class Translator {
         return new String(getUrlBytes(urlSpec));
     }
 
-    private static ArrayList<Language> gerSuppotedLangs(String baseLang){
+    private static Answer<ArrayList<Language>> gerSuppotedLangs(String baseLang){
+
+        Answer answer = new Answer();
 
         ArrayList<Language> result = new ArrayList<Language>();
 
@@ -77,16 +79,23 @@ public class Translator {
                 result.add(lang);
             };
 
+            answer.setSucсess(true);
         } catch (IOException e) {
-            e.printStackTrace();
+            answer.setErrMes(e.getMessage());
+            answer.setSucсess(false);
         } catch (JSONException e) {
-            e.printStackTrace();
+            answer.setErrMes(e.getMessage());
+            answer.setSucсess(false);
         }
 
-        return result;
+        Collections.sort(result);
+        answer.setResult(result);
+        return answer;
     }
 
-    private static String translate(String inputString, Language langIn, Language langOut){
+    private static Answer<String> translate(String inputString, Language langIn, Language langOut){
+
+        Answer answer = new Answer();
         String result = "";
 
         String lang = (langIn.isAutoLang()) ? langOut.getCode() : langIn.getCode() + "-" + langOut.getCode();
@@ -107,25 +116,29 @@ public class Translator {
             JSONArray text = jsonBody.getJSONArray("text");
             StringBuilder b = new StringBuilder();
             for (int i=0; i < text.length(); i++) {
-                result = result + (result.isEmpty() ? "":"\n") + text.get(i);
+                result = result + (result.isEmpty() ? "":", ") + text.get(i);
             }
 
+            answer.setSucсess(true);
         } catch (IOException e) {
-
+            answer.setErrMes(e.getMessage());
+            answer.setResult(false);
         } catch (JSONException e) {
-            e.printStackTrace();
+            answer.setErrMes(e.getMessage());
+            answer.setResult(false);
         }
 
-        return result;
+        answer.setResult(result);
+        return answer;
     }
 
 
-    public static class SuppotedLangs extends AsyncTask<Context,Void,ArrayList<Language>> {
+    public static class SuppotedLangs extends AsyncTask<Context,Void,Answer<ArrayList<Language>>> {
 
         private OnCompletedListener listener;
 
         public interface OnCompletedListener{
-            void onTaskCompleted(ArrayList<Language> result);
+            void onSupportedLangsTaskCompleted(Answer<ArrayList<Language>> result);
         }
 
         public void setCompleteListener(OnCompletedListener listener){
@@ -133,24 +146,22 @@ public class Translator {
         }
 
         @Override
-        protected ArrayList<Language> doInBackground(Context... con) {
+        protected Answer<ArrayList<Language>> doInBackground(Context... con) {
 
-            ArrayList<Language> result = gerSuppotedLangs(Locale.getDefault().getLanguage());
-
-            Collections.sort(result);
+            Answer<ArrayList<Language>> result = gerSuppotedLangs(Locale.getDefault().getLanguage());
 
             return result;
         }
 
         @Override
-        protected void onPostExecute(ArrayList<Language> langs) {
+        protected void onPostExecute(Answer<ArrayList<Language>> langs) {
             super.onPostExecute(langs);
             if (listener != null)
-                listener.onTaskCompleted(langs);
+                listener.onSupportedLangsTaskCompleted(langs);
         }
     }
 
-    public static class Trans extends AsyncTask<Context,Void,String> {
+    public static class Trans extends AsyncTask<Context,Void,Answer<String>> {
 
         private OnCompletedListener listener;
         private String inputString;
@@ -170,7 +181,7 @@ public class Translator {
         }
 
         public interface OnCompletedListener{
-            void onTaskCompleted(String result);
+            void onTranslateTaskCompleted(Answer<String> result);
         }
 
         public void setCompleteListener(OnCompletedListener listener){
@@ -178,20 +189,31 @@ public class Translator {
         }
 
         @Override
-        protected String doInBackground(Context... con) {
+        protected Answer<String> doInBackground(Context... con) {
 
-            String result = translate(inputString, langIn, langOut);
+            try {
+                Thread.sleep(TRANSLATE_DELAY);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
-            DbManager.getInstance(con[0]).addHistory(inputString, langIn, result, langOut);
+            if (isCancelled()){
+                return new Answer<String>();
+            }
+
+            Answer<String> result = translate(inputString, langIn, langOut);
+
+            if (result.isSucсess())
+                DbManager.getInstance(con[0]).addHistory(inputString, langIn, result.getResult(), langOut);
 
             return result;
         }
 
         @Override
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(Answer<String> result) {
             super.onPostExecute(result);
             if (listener != null)
-                listener.onTaskCompleted(result);
+                listener.onTranslateTaskCompleted(result);
         }
     }
 

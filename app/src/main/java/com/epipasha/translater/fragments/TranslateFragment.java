@@ -1,11 +1,14 @@
 package com.epipasha.translater.fragments;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.support.annotation.Nullable;
 import android.support.v4.content.res.ResourcesCompat;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,14 +21,13 @@ import android.widget.TextView;
 import com.epipasha.translater.R;
 import com.epipasha.translater.Translator;
 import com.epipasha.translater.db.DbManager;
+import com.epipasha.translater.objects.Answer;
 import com.epipasha.translater.objects.Language;
 
 import java.util.ArrayList;
 
 public class TranslateFragment extends Fragment
         implements Translator.SuppotedLangs.OnCompletedListener, Translator.Trans.OnCompletedListener{
-
-    private static final String KEY_OUTPUT_TEXT = "outputText";
 
     EditText textIn;
     TextView textOut;
@@ -34,6 +36,7 @@ public class TranslateFragment extends Fragment
 
     private ArrayList<Language> supportedLangs;
     private String outputText;
+    private Translator.Trans task;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -47,6 +50,17 @@ public class TranslateFragment extends Fragment
         spLangOut = (Spinner) v.findViewById(R.id.spLangOut);
         btnStar = (ImageButton)v.findViewById(R.id.btnStar);
         btnCross = (ImageButton)v.findViewById(R.id.btnClear);
+
+        TextView textView =(TextView)v.findViewById(R.id.translatedBy);
+        textView.setClickable(true);
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
+        String text = "<a href='http://translate.yandex.ru/'> Переведено сервисом «Яндекс.Переводчик» </a>";
+
+        if (Build.VERSION.SDK_INT >= 24) {
+            textView.setText(Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY));
+        } else {
+            textView.setText(Html.fromHtml(text));
+        }
 
         if (outputText!=null){
             textOut.setText(outputText);
@@ -65,6 +79,7 @@ public class TranslateFragment extends Fragment
 
             @Override
             public void afterTextChanged(Editable s) {
+                outputText = "";
                 translate();
             }
         });
@@ -84,6 +99,7 @@ public class TranslateFragment extends Fragment
         btnCross.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                outputText = "";
                 textIn.setText("");
             }
         });
@@ -107,20 +123,38 @@ public class TranslateFragment extends Fragment
         String inputText = textIn.getText().toString();
         if (inputText.isEmpty()) {
             textOut.setText("");
-        }else{
-            Translator.Trans task = new Translator.Trans();
-            task.setLangOut((Language) spLangOut.getSelectedItem());
-            task.setLangIn((Language) spLangIn.getSelectedItem());
-            task.setInputString(inputText);
-            task.setCompleteListener(this);
-            task.execute(getActivity());
+            return;
         }
+
+        Language langIn = (Language) spLangIn.getSelectedItem();
+        Language langOut = (Language) spLangOut.getSelectedItem();
+
+        if (langIn==null || langOut==null){
+            return;
+        }
+
+        if (task!=null && !task.isCancelled()){
+            task.cancel(true);
+        }
+
+        task = new Translator.Trans();
+        task.setLangOut(langOut);
+        task.setLangIn(langIn);
+        task.setInputString(inputText);
+        task.setCompleteListener(this);
+        task.execute(getActivity());
+
     }
 
     @Override
-    public void onTaskCompleted(ArrayList<Language> result) {
-        supportedLangs = result;
-        setAdapter();
+    public void onSupportedLangsTaskCompleted(Answer<ArrayList<Language>> result) {
+        if (result.isSucсess()){
+            supportedLangs = result.getResult();
+            setAdapter();
+        }else{
+            outputText = result.getErrMes();
+            textOut.setText(outputText);
+        }
     }
 
     private void setAdapter() {
@@ -137,9 +171,14 @@ public class TranslateFragment extends Fragment
     }
 
     @Override
-    public void onTaskCompleted(String result) {
-        outputText = result;
-        textOut.setText(result);
+    public void onTranslateTaskCompleted(Answer<String> result) {
+
+        if(result.isSucсess()) {
+            outputText = result.getResult();
+        }else{
+            outputText = result.getErrMes();
+        }
+        textOut.setText(outputText);
     }
 
 }
