@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private Fragment historyFrag;
     private Fragment translateFrag;
 
+    private int selectedItemPosition = 0;
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -42,16 +44,26 @@ public class MainActivity extends AppCompatActivity {
             FragmentTransaction tr = fm.beginTransaction();
             switch (item.getItemId()) {
                 case R.id.navigation_translate:
+                    tr.setCustomAnimations(R.animator.slide_in_left, R.animator.zoom_out);
                     tr.replace(R.id.content, translateFrag, TAG_TRANSLATE);
                     tr.commit();
+                    selectedItemPosition = 0;
                     return true;
                 case R.id.navigation_favorites:
+                    if (selectedItemPosition == 0){
+                        tr.setCustomAnimations(R.animator.slide_in_right, R.animator.zoom_out);
+                    }else{
+                        tr.setCustomAnimations(R.animator.slide_in_left, R.animator.zoom_out);
+                    }
                     tr.replace(R.id.content, favoritesFrag, TAG_FAVORITE);
                     tr.commit();
+                    selectedItemPosition = 1;
                     return true;
                 case R.id.navigation_history:
+                    tr.setCustomAnimations(R.animator.slide_in_right, R.animator.zoom_out);
                     tr.replace(R.id.content, historyFrag, TAG_HISTORY);
                     tr.commit();
+                    selectedItemPosition = 2;
                     return true;
             }
             return false;
