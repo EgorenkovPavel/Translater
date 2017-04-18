@@ -119,7 +119,7 @@ public class HistoryFragment extends Fragment
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new MyCursorLoader(getActivity(), db);
+        return new MyCursorLoader(getActivity(), db, mCurFilter);
     }
 
     @Override
@@ -139,15 +139,20 @@ public class HistoryFragment extends Fragment
     static class MyCursorLoader extends CursorLoader {
 
         SQLiteDatabase db;
+        String filter;
 
-        public MyCursorLoader(Context context, SQLiteDatabase db) {
+        public MyCursorLoader(Context context, SQLiteDatabase db, String filter) {
             super(context);
             this.db = db;
+            this.filter = filter;
         }
 
         @Override
         public Cursor loadInBackground() {
-            Cursor cursor = db.query(DbHelper.TABLE_HISTORY, null, null, null, null, null, DbHelper._ID + " DESC");
+            String sel = filter==null ? null : "input_text LIKE ? OR output_text LIKE ?";
+            String[] args = filter==null ? null : new String[]{"%"+filter+"%"};
+
+            Cursor cursor = db.query(DbHelper.TABLE_HISTORY, null, sel, args, null, null, DbHelper._ID + " DESC");
             return cursor;
         }
     }
